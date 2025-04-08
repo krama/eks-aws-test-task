@@ -29,8 +29,3 @@ output "metrics_server_version" {
   description = "Version of installed Metrics Server"
   value       = var.install_metrics_server ? var.metrics_server_chart_version : null
 }
-
-output "aws_load_balancer_controller_service_account_name" {
-  description = "Name of the Kubernetes service account for AWS Load Balancer Controller"
-  value       = var.install_aws_lb_controller ? local.aws_lb_controller_sa_name : null
-}

@@ -108,3 +108,38 @@ module "monitoring" {
 
   depends_on = [module.eks, module.addons]
 }
+
+# VPN module
+module "vpn" {
+  source = "./modules/vpn"
+
+  prefix               = var.prefix
+  environment          = var.environment
+  region               = var.region
+  vpc_id               = module.network.vpc_id
+  vpc_cidr             = module.network.vpc_cidr_block
+  private_subnet_ids   = module.network.private_subnet_ids
+  eks_cluster_sg_id    = module.eks.cluster_security_group_id
+  vpn_client_cidr      = var.vpn_client_cidr
+  vpn_split_tunnel     = var.vpn_split_tunnel
+  vpn_enable_logs      = var.vpn_enable_logs
+  tags                 = local.resource_tags
+
+  depends_on = [module.network, module.eks]
+}
+
+# ArgoCD module
+module "gitops" {
+  count  = var.install_argocd ? 1 : 0
+  source = "./modules/argocd"
+
+  prefix               = var.prefix
+  environment          = var.environment
+  eks_cluster_name     = module.eks.cluster_name
+  eks_oidc_provider_arn = module.eks.oidc_provider_arn
+  argocd_server_url    = module.eks.cluster_endpoint
+  helm_charts_repository_url = var.helm_charts_repository_url
+  tags                 = local.resource_tags
+
+  depends_on = [module.eks, module.security]
+}

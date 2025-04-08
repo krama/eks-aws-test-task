@@ -52,7 +52,7 @@ output "eks_oidc_provider_arn" {
 
 output "aws_load_balancer_controller_service_account" {
   description = "Name of service account for AWS Load Balancer Controller"
-  value       = module.addons.aws_load_balancer_controller_service_account_name
+  value       = module.load_balancer.aws_load_balancer_controller_service_account_name
 }
 
 output "cluster_autoscaler_service_account" {
@@ -68,4 +68,31 @@ output "metrics_server_installed" {
 output "prometheus_installed" {
   description = "Prometheus installation status"
   value       = module.monitoring.prometheus_installed
+}
+
+# VPN outputs
+output "vpn_endpoint_id" {
+  description = "ID VPN-эндпоинта"
+  value       = module.vpn.vpn_endpoint_id
+}
+
+output "vpn_dns_name" {
+  description = "DNS-имя VPN-эндпоинта"
+  value       = module.vpn.vpn_dns_name
+}
+
+# ArgoCD outputs
+output "argocd_namespace" {
+  description = "Namespace, в котором установлен ArgoCD"
+  value       = var.install_argocd ? module.gitops[0].argocd_namespace : null
+}
+
+output "argocd_server_service_name" {
+  description = "Имя сервиса сервера ArgoCD"
+  value       = var.install_argocd ? module.gitops[0].argocd_server_service_name : null
+}
+
+output "argocd_config_file" {
+  description = "Путь к файлу конфигурации ArgoCD"
+  value       = var.install_argocd ? module.gitops[0].argocd_config_file : null
 }

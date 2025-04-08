@@ -200,3 +200,34 @@ variable "localstack_secret_key" {
   sensitive   = true
 }
 
+# VPN settings
+variable "vpn_client_cidr" {
+  description = "CIDR-блок для клиентов VPN"
+  type        = string
+  default     = "172.16.0.0/22"
+}
+
+variable "vpn_split_tunnel" {
+  description = "Включить split tunnel для VPN"
+  type        = bool
+  default     = true
+}
+
+variable "vpn_enable_logs" {
+  description = "Включить логирование подключений VPN"
+  type        = bool
+  default     = true
+}
+
+# GitOps settings
+variable "install_argocd" {
+  description = "Установить ArgoCD для GitOps"
+  type        = bool
+  default     = true
+}
+
+variable "helm_charts_repository_url" {
+  description = "URL Git-репозитория с Helm-чартами"
+  type        = string
+  default     = "https://github.com/your-org/helm-charts.git"
+}
