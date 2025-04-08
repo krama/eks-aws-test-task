@@ -333,4 +333,3 @@ resource "aws_kms_alias" "eks_secrets_key_alias" {
   name          = "alias/${var.prefix}-eks-secrets-${var.environment}"
   target_key_id = aws_kms_key.eks_secrets_key.key_id
 }
-

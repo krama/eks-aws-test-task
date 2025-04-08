@@ -1,12 +1,12 @@
-# VPN Module для доступа к кластеру EKS
+# VPN Module for access to EKS cluster
 
-# Получаем данные о текущем AWS аккаунте
+# Retrieve current AWS account data
 data "aws_caller_identity" "current" {}
 
-# Данные о текущем AWS регионе
+# Current AWS region data
 data "aws_region" "current" {}
 
-# Создаем клиентский сертификат (самоподписанный для примера)
+# Create client certificate (self-signed for example)
 resource "tls_private_key" "ca" {
   algorithm = "RSA"
   rsa_bits  = 2048
@@ -58,14 +58,14 @@ resource "tls_locally_signed_cert" "server" {
   ]
 }
 
-# Загружаем сертификаты в ACM
+# Upload certificates to ACM
 resource "aws_acm_certificate" "server" {
   private_key       = tls_private_key.server.private_key_pem
   certificate_body  = tls_locally_signed_cert.server.cert_pem
   certificate_chain = tls_self_signed_cert.ca.cert_pem
 }
 
-# Создаем Client VPN Endpoint
+# Create Client VPN Endpoint
 resource "aws_ec2_client_vpn_endpoint" "vpn" {
   description            = "${var.prefix}-eks-vpn-${var.environment}"
   server_certificate_arn = aws_acm_certificate.server.arn
@@ -91,7 +91,7 @@ resource "aws_ec2_client_vpn_endpoint" "vpn" {
   )
 }
 
-# CloudWatch Log Group для логов VPN
+# CloudWatch Log Group for VPN logs
 resource "aws_cloudwatch_log_group" "vpn_logs" {
   count = var.vpn_enable_logs ? 1 : 0
   
@@ -113,7 +113,7 @@ resource "aws_cloudwatch_log_stream" "vpn_logs" {
   log_group_name = aws_cloudwatch_log_group.vpn_logs[0].name
 }
 
-# Связываем VPN с подсетями
+# Associate VPN with subnets
 resource "aws_ec2_client_vpn_network_association" "vpn_subnet" {
   count = length(var.private_subnet_ids)
   
@@ -121,14 +121,14 @@ resource "aws_ec2_client_vpn_network_association" "vpn_subnet" {
   subnet_id              = var.private_subnet_ids[count.index]
 }
 
-# Правила авторизации для доступа
+# Authorization rules for access
 resource "aws_ec2_client_vpn_authorization_rule" "vpn_auth_all" {
   client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn.id
   target_network_cidr    = "0.0.0.0/0"
   authorize_all_groups   = true
 }
 
-# Правила для доступа к VPC
+# Routes for VPC access
 resource "aws_ec2_client_vpn_route" "vpn_route" {
   count = var.vpn_split_tunnel ? 1 : 0
   
@@ -137,7 +137,7 @@ resource "aws_ec2_client_vpn_route" "vpn_route" {
   target_vpc_subnet_id   = var.private_subnet_ids[0]
 }
 
-# Создаем Security Group для VPN
+# Create Security Group for VPN
 resource "aws_security_group" "vpn_sg" {
   name        = "${var.prefix}-vpn-sg-${var.environment}"
   description = "Security group for VPN connection to EKS"
@@ -159,7 +159,7 @@ resource "aws_security_group" "vpn_sg" {
   )
 }
 
-# Правила Security Group
+# Security Group Rules
 resource "aws_security_group_rule" "vpn_to_eks" {
   security_group_id        = var.eks_cluster_sg_id
   type                     = "ingress"

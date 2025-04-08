@@ -1,62 +1,62 @@
 variable "prefix" {
-  description = "Префикс для всех ресурсов"
+  description = "Prefix for all resources"
   type        = string
 }
 
 variable "environment" {
-  description = "Окружение развертывания"
+  description = "Deployment environment"
   type        = string
 }
 
 variable "eks_cluster_name" {
-  description = "Имя кластера EKS"
+  description = "Name of EKS cluster"
   type        = string
 }
 
 variable "eks_oidc_provider_arn" {
-  description = "ARN OIDC-провайдера кластера EKS"
+  description = "ARN of OIDC provider for EKS cluster"
   type        = string
 }
 
 variable "argocd_namespace" {
-  description = "Kubernetes namespace для ArgoCD"
+  description = "Kubernetes namespace for ArgoCD"
   type        = string
   default     = "argocd"
 }
 
 variable "argocd_chart_version" {
-  description = "Версия Helm-чарта ArgoCD"
+  description = "Helm chart version for ArgoCD"
   type        = string
   default     = "5.46.0"
 }
 
 variable "argocd_admin_password_bcrypt" {
-  description = "Bcrypt-хеш пароля администратора ArgoCD"
+  description = "Bcrypt hash of admin password for ArgoCD"
   type        = string
   sensitive   = true
-  default     = "$2a$10$xPRRTG1CGWJf.CqAe3MFS.kVs8SYbpkB5Wn3QQidr1LvNUFm4r1MC" # Пароль по умолчанию: admin
+  default     = "$2a$10$xPRRTG1CGWJf.CqAe3MFS.kVs8SYbpkB5Wn3QQidr1LvNUFm4r1MC" # Default password: admin
 }
 
 variable "argocd_server_service_type" {
-  description = "Тип сервиса для сервера ArgoCD (ClusterIP, LoadBalancer)"
+  description = "Service type for ArgoCD server (ClusterIP, LoadBalancer)"
   type        = string
   default     = "ClusterIP"
 }
 
 variable "argocd_server_url" {
-  description = "URL сервера ArgoCD"
+  description = "URL of ArgoCD server"
   type        = string
   default     = ""
 }
 
 variable "helm_charts_repository_url" {
-  description = "URL Git-репозитория с Helm-чартами"
+  description = "URL of Git repository with Helm charts"
   type        = string
   default     = "https://github.com/your-org/helm-charts.git"
 }
 
 variable "tags" {
-  description = "Теги для всех ресурсов"
+  description = "Tags for all resources"
   type        = map(string)
   default     = {}
 }

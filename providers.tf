@@ -1,5 +1,7 @@
 # Configure providers for EKS infrastructure
-
+provider "tls" {
+  alias = "mocked"
+}
 provider "aws" {
   region = var.region
 
@@ -15,6 +17,7 @@ provider "aws" {
       ec2            = var.localstack_endpoint
       ecr            = var.localstack_endpoint
       ecs            = var.localstack_endpoint
+      eks            = var.localstack_endpoint
       es             = var.localstack_endpoint
       firehose       = var.localstack_endpoint
       iam            = var.localstack_endpoint

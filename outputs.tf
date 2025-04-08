@@ -65,34 +65,29 @@ output "metrics_server_installed" {
   value       = module.addons.metrics_server_installed
 }
 
-output "prometheus_installed" {
-  description = "Prometheus installation status"
-  value       = module.monitoring.prometheus_installed
-}
-
 # VPN outputs
 output "vpn_endpoint_id" {
-  description = "ID VPN-эндпоинта"
+  description = "ID of VPN endpoint"
   value       = module.vpn.vpn_endpoint_id
 }
 
 output "vpn_dns_name" {
-  description = "DNS-имя VPN-эндпоинта"
+  description = "DNS name of VPN endpoint"
   value       = module.vpn.vpn_dns_name
 }
 
 # ArgoCD outputs
 output "argocd_namespace" {
-  description = "Namespace, в котором установлен ArgoCD"
+  description = "Namespace where ArgoCD is installed"
   value       = var.install_argocd ? module.gitops[0].argocd_namespace : null
 }
 
 output "argocd_server_service_name" {
-  description = "Имя сервиса сервера ArgoCD"
+  description = "Name of ArgoCD server service"
   value       = var.install_argocd ? module.gitops[0].argocd_server_service_name : null
 }
 
 output "argocd_config_file" {
-  description = "Путь к файлу конфигурации ArgoCD"
+  description = "Path to ArgoCD configuration file"
   value       = var.install_argocd ? module.gitops[0].argocd_config_file : null
 }

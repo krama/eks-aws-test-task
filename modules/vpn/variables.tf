@@ -1,64 +1,64 @@
 variable "prefix" {
-  description = "Префикс для всех ресурсов"
+  description = "Prefix for all resources"
   type        = string
 }
 
 variable "environment" {
-  description = "Окружение развертывания"
+  description = "Deployment environment"
   type        = string
 }
 
 variable "region" {
-  description = "AWS регион"
+  description = "AWS region"
   type        = string
 }
 
 variable "vpc_id" {
-  description = "ID VPC для развертывания VPN"
+  description = "ID of VPC for VPN deployment"
   type        = string
 }
 
 variable "vpc_cidr" {
-  description = "CIDR-блок VPC"
+  description = "CIDR block of VPC"
   type        = string
 }
 
 variable "private_subnet_ids" {
-  description = "Список ID приватных подсетей для VPN"
+  description = "List of private subnet IDs for VPN"
   type        = list(string)
 }
 
 variable "eks_cluster_sg_id" {
-  description = "ID группы безопасности кластера EKS"
+  description = "ID of EKS cluster security group"
   type        = string
 }
 
 variable "vpn_client_cidr" {
-  description = "CIDR-блок для клиентов VPN"
+  description = "CIDR block for VPN clients"
   type        = string
   default     = "172.16.0.0/22"
 }
 
 variable "vpn_split_tunnel" {
-  description = "Включить split tunnel для VPN (только трафик к VPC идет через VPN)"
+  description = "Enable split tunnel for VPN (only traffic to VPC goes through VPN)"
   type        = bool
   default     = true
 }
 
 variable "vpn_enable_logs" {
-  description = "Включить логирование подключений VPN"
+  description = "Enable logging for VPN connections"
   type        = bool
   default     = true
 }
 
 variable "vpn_log_retention_days" {
-  description = "Период хранения логов VPN в днях"
+  description = "Retention period for VPN logs in days"
   type        = number
   default     = 30
 }
 
 variable "tags" {
-  description = "Теги для всех ресурсов"
+  description = "Tags for all resources"
   type        = map(string)
   default     = {}
 }

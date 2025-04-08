@@ -16,16 +16,17 @@ module "network" {
 
 # Security module (IAM, Security Groups, etc.)
 module "security" {
-  source = "./modules/security"
-
-  prefix               = var.prefix
-  environment          = var.environment
-  region               = var.region
-  vpc_id               = module.network.vpc_id
-  cluster_name         = local.eks_cluster_name
-  oidc_provider_arn    = module.eks.oidc_provider_arn
+  source              = "./modules/security"
+  prefix              = var.prefix
+  environment         = var.environment
+  region              = var.region
+  vpc_id              = module.network.vpc_id
+  cluster_name        = local.eks_cluster_name
+  oidc_provider_arn   = module.eks.oidc_provider_arn
   eks_managed_node_groups = module.eks.managed_node_groups
-  tags                 = local.resource_tags
+  tags                = local.resource_tags
+
+  eks_node_role_name  = module.eks.node_role_name
 
   depends_on = [module.network, module.eks]
 }
@@ -48,6 +49,9 @@ module "eks" {
   # Node groups settings
   node_groups_defaults     = var.node_groups_defaults
   managed_node_groups      = var.managed_node_groups
+  
+  # Добавляем флаг использования LocalStack
+  use_localstack           = var.use_localstack
   
   tags                     = local.resource_tags
 
@@ -94,7 +98,7 @@ module "addons" {
   depends_on = [module.eks, module.security]
 }
 
-# Monitoring module (CloudWatch, Prometheus, etc.)
+# Monitoring module (CloudWatch)
 module "monitoring" {
   source = "./modules/monitoring"
 
@@ -103,7 +107,6 @@ module "monitoring" {
   eks_cluster_name     = module.eks.cluster_name
   retention_in_days    = var.log_retention_in_days
   eks_oidc_provider_arn = module.eks.oidc_provider_arn
-  install_prometheus    = var.install_prometheus
   tags                 = local.resource_tags
 
   depends_on = [module.eks, module.addons]

@@ -1,12 +1,12 @@
 # GitOps Module for ArgoCD installation
 
-# Получаем данные о текущем AWS аккаунте
+# Retrieve current AWS account data
 data "aws_caller_identity" "current" {}
 
-# Данные о текущем AWS регионе
+# Current AWS region data
 data "aws_region" "current" {}
 
-# Создаем пространство имен для ArgoCD
+# Create namespace for ArgoCD
 resource "kubernetes_namespace" "argocd" {
   metadata {
     name = var.argocd_namespace
@@ -17,7 +17,7 @@ resource "kubernetes_namespace" "argocd" {
   }
 }
 
-# Создаем IAM-роль для ArgoCD
+# Create IAM role for ArgoCD
 resource "aws_iam_role" "argocd_role" {
   name = "${var.prefix}-argocd-role-${var.environment}"
   
@@ -38,10 +38,10 @@ resource "aws_iam_role" "argocd_role" {
   })
 }
 
-# Политика для доступа к AWS-сервисам из ArgoCD
+# Policy for accessing AWS services from ArgoCD
 resource "aws_iam_policy" "argocd_policy" {
   name        = "${var.prefix}-argocd-policy-${var.environment}"
-  description = "Политика для ArgoCD"
+  description = "Policy for ArgoCD"
   
   policy = jsonencode({
     Version = "2012-10-17",
@@ -64,13 +64,13 @@ resource "aws_iam_policy" "argocd_policy" {
   })
 }
 
-# Привязываем политику к роли
+# Attach policy to role
 resource "aws_iam_role_policy_attachment" "argocd_policy_attachment" {
   role       = aws_iam_role.argocd_role.name
   policy_arn = aws_iam_policy.argocd_policy.arn
 }
 
-# Создаем сервисный аккаунт Kubernetes для ArgoCD
+# Create Kubernetes service account for ArgoCD
 resource "kubernetes_service_account" "argocd_controller_sa" {
   metadata {
     name      = "argocd-application-controller"
@@ -86,7 +86,7 @@ resource "kubernetes_service_account" "argocd_controller_sa" {
   ]
 }
 
-# Устанавливаем ArgoCD через Helm
+# Install ArgoCD via Helm
 resource "helm_release" "argocd" {
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
@@ -135,7 +135,7 @@ resource "helm_release" "argocd" {
   ]
 }
 
-# Генерируем файл конфигурации для клиентов ArgoCD
+# Generate configuration file for ArgoCD clients
 resource "local_file" "argocd_config" {
   content  = <<-EOF
 apiVersion: v1

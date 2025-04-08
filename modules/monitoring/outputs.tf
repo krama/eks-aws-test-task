@@ -1,25 +1,5 @@
 # Output variables for monitoring module
 
-output "prometheus_installed" {
-  description = "Flag indicating if Prometheus was installed"
-  value       = var.install_prometheus
-}
-
-output "prometheus_service_account_name" {
-  description = "Name of Kubernetes service account for Prometheus"
-  value       = var.install_prometheus ? local.prometheus_sa_name : null
-}
-
-output "prometheus_role_arn" {
-  description = "ARN of IAM role for Prometheus"
-  value       = var.install_prometheus ? aws_iam_role.prometheus_role[0].arn : null
-}
-
-output "monitoring_namespace" {
-  description = "Name of Kubernetes namespace for monitoring"
-  value       = local.monitoring_namespace
-}
-
 output "cluster_log_group_name" {
   description = "Name of CloudWatch Log Group for EKS cluster logs"
   value       = aws_cloudwatch_log_group.eks_cluster_logs.name

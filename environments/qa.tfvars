@@ -85,4 +85,3 @@ managed_node_groups = {
 install_aws_load_balancer_controller = true
 install_metrics_server = true
 install_cluster_autoscaler = true
-install_prometheus = true

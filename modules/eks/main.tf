@@ -229,13 +229,16 @@ resource "aws_iam_role_policy_attachment" "eks_ssm_policy" {
 
 # Create OIDC provider for EKS cluster
 data "tls_certificate" "eks_oidc" {
-  url = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+  count = var.use_localstack ? 0 : 1
+  url   = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 }
 
-resource "aws_iam_openid_connect_provider" "eks_oidc" {
+resource "aws_iam_openid_connect_provider" "eks_oidc_mock" {
+  count = var.use_localstack ? 1 : 0
+  
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.eks_oidc.certificates[0].sha1_fingerprint]
-  url             = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+  thumbprint_list = ["0123456789012345678901234567890123456789"]
+  url             = "https://authress.localhost.localstack.cloud:4566"
   
   tags = merge(
     var.tags,
@@ -244,6 +247,26 @@ resource "aws_iam_openid_connect_provider" "eks_oidc" {
     }
   )
 }
+
+# Create real OIDC provider for EKS cluster when not using LocalStack
+resource "aws_iam_openid_connect_provider" "eks_oidc" {
+  count = var.use_localstack ? 0 : 1
+  
+  client_id_list  = ["sts.amazonaws.com"]
+  
+  # Use the thumbprint from the TLS certificate data source
+  thumbprint_list = [data.tls_certificate.eks_oidc[0].certificates[0].sha1_fingerprint]
+  
+  url = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+  
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.prefix}-eks-oidc-provider-${var.environment}"
+    }
+  )
+}
+
 
 # Create managed node groups for EKS
 resource "aws_eks_node_group" "eks_node_groups" {
@@ -282,7 +305,7 @@ resource "aws_eks_node_group" "eks_node_groups" {
   }
   
   labels = merge(
-    var.node_groups_defaults.labels,
+    lookup(var.node_groups_defaults, "labels", {}),
     lookup(each.value, "labels", {})
   )
   

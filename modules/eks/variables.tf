@@ -67,7 +67,7 @@ variable "log_retention_days" {
 }
 
 variable "node_groups_defaults" {
-  description = "Default settings for all EKS node groups"
+  description = "Default settings for EKS node groups"
   type        = any
   default     = {
     ami_type       = "AL2_x86_64"
@@ -75,7 +75,7 @@ variable "node_groups_defaults" {
     disk_size      = 50
     min_size       = 1
     max_size       = 3
-    desired_size   = 2
+    desired_size   = 1
     labels         = {}
   }
 }
@@ -116,4 +116,10 @@ variable "tags" {
   description = "Tags for all resources"
   type        = map(string)
   default     = {}
+}
+
+variable "use_localstack" {
+  description = "Flag indicating if LocalStack is being used"
+  type        = bool
+  default     = true
 }

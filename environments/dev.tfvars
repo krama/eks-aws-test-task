@@ -35,7 +35,6 @@ node_groups_defaults = {
 install_aws_load_balancer_controller = true
 install_metrics_server = true
 install_cluster_autoscaler = true
-install_prometheus = false  # Do not install Prometheus for dev environment to save resources
 
 managed_node_groups = {
   app_nodes = {

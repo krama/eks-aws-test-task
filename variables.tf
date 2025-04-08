@@ -168,12 +168,6 @@ variable "install_cluster_autoscaler" {
   default     = true
 }
 
-variable "install_prometheus" {
-  description = "Install Prometheus for monitoring"
-  type        = bool
-  default     = true
-}
-
 variable "use_localstack" {
   description = "Use LocalStack for local development"
   type        = bool
@@ -202,32 +196,32 @@ variable "localstack_secret_key" {
 
 # VPN settings
 variable "vpn_client_cidr" {
-  description = "CIDR-блок для клиентов VPN"
+  description = "CIDR block for VPN clients"
   type        = string
   default     = "172.16.0.0/22"
 }
 
 variable "vpn_split_tunnel" {
-  description = "Включить split tunnel для VPN"
+  description = "Enable split tunnel for VPN"
   type        = bool
   default     = true
 }
 
 variable "vpn_enable_logs" {
-  description = "Включить логирование подключений VPN"
+  description = "Enable logging for VPN connections"
   type        = bool
   default     = true
 }
 
 # GitOps settings
 variable "install_argocd" {
-  description = "Установить ArgoCD для GitOps"
+  description = "Install ArgoCD for GitOps"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "helm_charts_repository_url" {
-  description = "URL Git-репозитория с Helm-чартами"
+  description = "URL of Git repository with Helm charts"
   type        = string
   default     = "https://github.com/your-org/helm-charts.git"
 }

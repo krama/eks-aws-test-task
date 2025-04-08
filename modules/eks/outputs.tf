@@ -47,12 +47,11 @@ output "managed_node_groups" {
 
 output "oidc_provider" {
   description = "URL of EKS cluster OIDC provider"
-  value       = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+  value       = var.use_localstack ? "https://authress.localhost.localstack.cloud:4566" : aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 }
-
 output "oidc_provider_arn" {
   description = "ARN of EKS cluster OIDC provider"
-  value       = aws_iam_openid_connect_provider.eks_oidc.arn
+  value       = var.use_localstack ? aws_iam_openid_connect_provider.eks_oidc_mock[0].arn : aws_iam_openid_connect_provider.eks_oidc[0].arn
 }
 
 output "cluster_primary_security_group_id" {
