@@ -54,11 +54,18 @@ provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.region]
+  # Используем стандартную конфигурацию для реального окружения
+  dynamic "exec" {
+    for_each = var.use_localstack ? [] : [1]
+    content {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.region]
+    }
   }
+
+  # Для LocalStack используем упрощенную конфигурацию 
+  config_path = var.use_localstack ? "${path.module}/kubeconfig-localstack.yaml" : ""
 }
 
 # Helm provider for installing charts
@@ -67,11 +74,16 @@ provider "helm" {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
-    exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.region]
+    dynamic "exec" {
+      for_each = var.use_localstack ? [] : [1]
+      content {
+        api_version = "client.authentication.k8s.io/v1beta1"
+        command     = "aws"
+        args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.region]
+      }
     }
+    
+    config_path = var.use_localstack ? "${path.module}/kubeconfig-localstack.yaml" : ""
   }
 }
 
@@ -79,11 +91,16 @@ provider "helm" {
 provider "kubectl" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-  load_config_file       = false
+  load_config_file       = var.use_localstack
 
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.region]
+  dynamic "exec" {
+    for_each = var.use_localstack ? [] : [1]
+    content {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.region]
+    }
   }
+  
+  config_path = var.use_localstack ? "${path.module}/kubeconfig-localstack.yaml" : ""
 }

@@ -60,21 +60,39 @@ resource "tls_locally_signed_cert" "server" {
 
 # Upload certificates to ACM
 resource "aws_acm_certificate" "server" {
+  count = var.use_localstack ? 0 : 1
+  
   private_key       = tls_private_key.server.private_key_pem
   certificate_body  = tls_locally_signed_cert.server.cert_pem
   certificate_chain = tls_self_signed_cert.ca.cert_pem
 }
 
+# Создаем mock-ресурс для LocalStack
+resource "null_resource" "acm_mock" {
+  count = var.use_localstack ? 1 : 0
+  
+  # Симуляция ACM сертификата для LocalStack
+  triggers = {
+    certificate_arn = "arn:aws:acm:${var.region}:${data.aws_caller_identity.current.account_id}:certificate/mock-certificate-id"
+  }
+}
+
+locals {
+  certificate_arn = var.use_localstack ? (length(null_resource.acm_mock) > 0 ? null_resource.acm_mock[0].triggers.certificate_arn : "") : (length(aws_acm_certificate.server) > 0 ? aws_acm_certificate.server[0].arn : "")
+}
+
 # Create Client VPN Endpoint
 resource "aws_ec2_client_vpn_endpoint" "vpn" {
+  count = var.use_localstack ? 0 : 1
+  
   description            = "${var.prefix}-eks-vpn-${var.environment}"
-  server_certificate_arn = aws_acm_certificate.server.arn
+  server_certificate_arn = local.certificate_arn
   client_cidr_block      = var.vpn_client_cidr
   split_tunnel           = var.vpn_split_tunnel
 
   authentication_options {
     type                       = "certificate-authentication"
-    root_certificate_chain_arn = aws_acm_certificate.server.arn
+    root_certificate_chain_arn = local.certificate_arn
   }
 
   connection_log_options {
@@ -93,7 +111,7 @@ resource "aws_ec2_client_vpn_endpoint" "vpn" {
 
 # CloudWatch Log Group for VPN logs
 resource "aws_cloudwatch_log_group" "vpn_logs" {
-  count = var.vpn_enable_logs ? 1 : 0
+  count = var.vpn_enable_logs && !var.use_localstack ? 1 : 0
   
   name              = "/aws/vpn/${var.prefix}-${var.environment}"
   retention_in_days = var.vpn_log_retention_days
@@ -107,7 +125,7 @@ resource "aws_cloudwatch_log_group" "vpn_logs" {
 }
 
 resource "aws_cloudwatch_log_stream" "vpn_logs" {
-  count = var.vpn_enable_logs ? 1 : 0
+  count = var.vpn_enable_logs && !var.use_localstack ? 1 : 0
   
   name           = "vpn-connection-logs"
   log_group_name = aws_cloudwatch_log_group.vpn_logs[0].name
@@ -115,24 +133,26 @@ resource "aws_cloudwatch_log_stream" "vpn_logs" {
 
 # Associate VPN with subnets
 resource "aws_ec2_client_vpn_network_association" "vpn_subnet" {
-  count = length(var.private_subnet_ids)
+  count = !var.use_localstack ? length(var.private_subnet_ids) : 0
   
-  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn.id
+  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn[0].id
   subnet_id              = var.private_subnet_ids[count.index]
 }
 
 # Authorization rules for access
 resource "aws_ec2_client_vpn_authorization_rule" "vpn_auth_all" {
-  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn.id
+  count = !var.use_localstack ? 1 : 0
+  
+  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn[0].id
   target_network_cidr    = "0.0.0.0/0"
   authorize_all_groups   = true
 }
 
 # Routes for VPC access
 resource "aws_ec2_client_vpn_route" "vpn_route" {
-  count = var.vpn_split_tunnel ? 1 : 0
+  count = var.vpn_split_tunnel && !var.use_localstack ? 1 : 0
   
-  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn.id
+  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn[0].id
   destination_cidr_block = var.vpc_cidr
   target_vpc_subnet_id   = var.private_subnet_ids[0]
 }

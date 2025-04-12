@@ -272,7 +272,7 @@ resource "aws_iam_role_policy_attachment" "aws_lb_controller_role_attachment" {
 
 # Create Kubernetes service account for AWS Load Balancer Controller
 resource "kubernetes_service_account" "aws_lb_controller_sa" {
-  count = var.create_service_account ? 1 : 0
+  count = var.create_service_account && !var.use_localstack ? 1 : 0
   
   metadata {
     name      = local.aws_lb_controller_sa_name
@@ -291,7 +291,7 @@ resource "kubernetes_service_account" "aws_lb_controller_sa" {
 
 # Install AWS Load Balancer Controller via Helm if enabled
 resource "helm_release" "aws_load_balancer_controller" {
-  count = var.install_aws_load_balancer_controller ? 1 : 0
+  count = var.install_aws_load_balancer_controller && !var.use_localstack ? 1 : 0
   
   name       = "aws-load-balancer-controller"
   repository = "https://aws.github.io/eks-charts"

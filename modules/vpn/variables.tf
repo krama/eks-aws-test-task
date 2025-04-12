@@ -62,3 +62,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "use_localstack" {
+  description = "Flag indicating if LocalStack is being used"
+  type        = bool
+  default     = false
+}

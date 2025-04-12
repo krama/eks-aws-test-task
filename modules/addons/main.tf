@@ -18,13 +18,13 @@ locals {
 
 # AWS EKS Managed Add-ons
 resource "aws_eks_addon" "eks_addons" {
-  for_each = var.aws_eks_addons
+  for_each = var.use_localstack ? {} : var.aws_eks_addons
 
   cluster_name                = var.eks_cluster_name
   addon_name                  = each.value.addon_name
   addon_version               = lookup(each.value, "addon_version", null)
-  resolve_conflicts           = lookup(each.value, "resolve_conflicts", "OVERWRITE")
-  service_account_role_arn    = lookup(each.value, "service_account_role_arn", null)
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
   
   tags = merge(
     var.tags,
@@ -95,7 +95,7 @@ resource "aws_iam_role_policy_attachment" "cluster_autoscaler_attachment" {
 
 # Create Kubernetes Service Account for Cluster Autoscaler
 resource "kubernetes_service_account" "cluster_autoscaler_sa" {
-  count = var.install_cluster_autoscaler ? 1 : 0
+  count = var.install_cluster_autoscaler && !var.use_localstack ? 1 : 0
   
   metadata {
     name      = local.cluster_autoscaler_sa_name
@@ -114,7 +114,7 @@ resource "kubernetes_service_account" "cluster_autoscaler_sa" {
 
 # Install Cluster Autoscaler via Helm
 resource "helm_release" "cluster_autoscaler" {
-  count = var.install_cluster_autoscaler ? 1 : 0
+  count = var.install_cluster_autoscaler && !var.use_localstack ? 1 : 0
   
   name       = "cluster-autoscaler"
   repository = "https://kubernetes.github.io/autoscaler"
@@ -187,7 +187,7 @@ resource "helm_release" "cluster_autoscaler" {
 
 # Install Metrics Server via Helm
 resource "helm_release" "metrics_server" {
-  count = var.install_metrics_server ? 1 : 0
+  count = var.install_metrics_server && !var.use_localstack ? 1 : 0
   
   name       = "metrics-server"
   repository = "https://kubernetes-sigs.github.io/metrics-server/"

@@ -64,7 +64,7 @@ variable "internal_access_cidrs" {
 variable "eks_cluster_version" {
   description = "Kubernetes version for EKS cluster"
   type        = string
-  default     = "1.27"
+  default     = "1.31"
 }
 
 variable "endpoint_private_access" {
@@ -168,6 +168,7 @@ variable "install_cluster_autoscaler" {
   default     = true
 }
 
+# LocalStack settings
 variable "use_localstack" {
   description = "Use LocalStack for local development"
   type        = bool

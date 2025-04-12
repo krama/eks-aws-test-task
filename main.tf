@@ -50,7 +50,7 @@ module "eks" {
   node_groups_defaults     = var.node_groups_defaults
   managed_node_groups      = var.managed_node_groups
   
-  # Добавляем флаг использования LocalStack
+  # Флаг использования LocalStack
   use_localstack           = var.use_localstack
   
   tags                     = local.resource_tags
@@ -68,6 +68,7 @@ module "load_balancer" {
   public_subnet_ids        = module.network.public_subnet_ids
   eks_cluster_name         = module.eks.cluster_name
   oidc_provider_arn        = module.eks.oidc_provider_arn
+  use_localstack           = var.use_localstack
   tags                     = local.resource_tags
 
   depends_on = [module.eks, module.security]
@@ -92,6 +93,9 @@ module "addons" {
   install_aws_load_balancer_controller = var.install_aws_load_balancer_controller
   install_metrics_server    = var.install_metrics_server
   install_cluster_autoscaler = var.install_cluster_autoscaler
+  
+  # Флаг использования LocalStack
+  use_localstack           = var.use_localstack
   
   tags                     = local.resource_tags
 
@@ -126,6 +130,7 @@ module "vpn" {
   vpn_client_cidr      = var.vpn_client_cidr
   vpn_split_tunnel     = var.vpn_split_tunnel
   vpn_enable_logs      = var.vpn_enable_logs
+  use_localstack       = var.use_localstack
   tags                 = local.resource_tags
 
   depends_on = [module.network, module.eks]
@@ -133,7 +138,7 @@ module "vpn" {
 
 # ArgoCD module
 module "gitops" {
-  count  = var.install_argocd ? 1 : 0
+  count  = var.install_argocd && !var.use_localstack ? 1 : 0
   source = "./modules/argocd"
 
   prefix               = var.prefix

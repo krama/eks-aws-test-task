@@ -6,19 +6,6 @@ data "aws_caller_identity" "current" {}
 # Current AWS region data
 data "aws_region" "current" {}
 
-# Create CloudWatch Log Group for EKS cluster logs
-resource "aws_cloudwatch_log_group" "eks_cluster_logs" {
-  name              = "/aws/eks/${var.eks_cluster_name}/cluster"
-  retention_in_days = var.retention_in_days
-  
-  tags = merge(
-    var.tags,
-    {
-      Name = "${var.prefix}-eks-cluster-logs-${var.environment}"
-    }
-  )
-}
-
 # Create CloudWatch Dashboard for EKS cluster monitoring
 resource "aws_cloudwatch_dashboard" "eks_dashboard" {
   count = var.create_cloudwatch_dashboard ? 1 : 0
