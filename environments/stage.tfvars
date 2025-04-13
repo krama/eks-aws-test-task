@@ -32,15 +32,31 @@ node_groups_defaults = {
 }
 
 managed_node_groups = {
-  app_nodes = {
-    name           = "app-nodes"
+  app_nodes_a = {
+    name           = "app-nodes-a"
     instance_types = ["t3.medium"]
-    min_size       = 2
+    min_size       = 1
     max_size       = 5
-    desired_size   = 2
+    desired_size   = 1
     disk_size      = 30
+    # Bound to the first zone through AZ in the name
     labels = {
       role = "app"
+      az   = "a"
+    }
+    taints = []
+  }
+  app_nodes_b = {
+    name           = "app-nodes-b"
+    instance_types = ["t3.medium"]
+    min_size       = 1
+    max_size       = 5
+    desired_size   = 1
+    disk_size      = 30
+    # Bound to the second zone through AZ in the name
+    labels = {
+      role = "app"
+      az   = "b"
     }
     taints = []
   }
@@ -51,6 +67,7 @@ managed_node_groups = {
     max_size       = 3
     desired_size   = 1
     disk_size      = 20
+    # Distributed across all availability zones
     labels = {
       role = "system"
     }

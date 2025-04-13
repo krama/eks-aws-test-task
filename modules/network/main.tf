@@ -43,6 +43,7 @@ resource "aws_subnet" "public" {
       Name = "${var.prefix}-public-subnet-${var.environment}-${local.azs[count.index]}"
       "kubernetes.io/cluster/${var.prefix}-${var.environment}-eks-cluster" = "shared"
       "kubernetes.io/role/elb" = "1"  # Tag for AWS Load Balancer Controller
+      "availability-zone" = element(split("-", local.azs[count.index]), length(split("-", local.azs[count.index])) - 1)
     }
   )
 }
@@ -61,6 +62,7 @@ resource "aws_subnet" "private" {
       Name = "${var.prefix}-private-subnet-${var.environment}-${local.azs[count.index]}"
       "kubernetes.io/cluster/${var.prefix}-${var.environment}-eks-cluster" = "shared"
       "kubernetes.io/role/internal-elb" = "1"  # Tag for AWS Load Balancer Controller
+      "availability-zone" = element(split("-", local.azs[count.index]), length(split("-", local.azs[count.index])) - 1)
     }
   )
 }

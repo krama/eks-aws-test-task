@@ -39,7 +39,7 @@ managed_node_groups = {
     max_size       = 10
     desired_size   = 3
     disk_size      = 100
-    subnet_ids     = [] # Will be filled with the subnet of the first availability zone
+    # Will be bound to the first availability zone through AZ in the name
     labels = {
       role = "app"
       az   = "a"
@@ -54,7 +54,7 @@ managed_node_groups = {
     max_size       = 10
     desired_size   = 3
     disk_size      = 100
-    subnet_ids     = [] # Will be filled with the subnet of the second availability zone
+    # Will be bound to the second availability zone through AZ in the name
     labels = {
       role = "app"
       az   = "b"
@@ -69,7 +69,7 @@ managed_node_groups = {
     max_size       = 10
     desired_size   = 3
     disk_size      = 100
-    subnet_ids     = [] # Will be filled with the subnet of the third availability zone
+    # Will be bound to the third availability zone through AZ in the name
     labels = {
       role = "app"
       az   = "c"
@@ -84,6 +84,7 @@ managed_node_groups = {
     max_size       = 6
     desired_size   = 3
     disk_size      = 50
+    # Distributed across all availability zones
     labels = {
       role = "system"
     }
@@ -101,6 +102,7 @@ managed_node_groups = {
     max_size       = 4
     desired_size   = 2
     disk_size      = 200  # Large size for storing metrics and logs
+    # Distributed across all availability zones
     labels = {
       role = "monitoring"
     }

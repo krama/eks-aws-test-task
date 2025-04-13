@@ -76,18 +76,36 @@ output "vpn_dns_name" {
   value       = module.vpn.vpn_dns_name
 }
 
-# ArgoCD outputs
-output "argocd_namespace" {
-  description = "Namespace where ArgoCD is installed"
-  value       = var.install_argocd ? module.gitops[0].argocd_namespace : null
-}
-
-output "argocd_server_service_name" {
-  description = "Name of ArgoCD server service"
-  value       = var.install_argocd ? module.gitops[0].argocd_server_service_name : null
-}
-
-output "argocd_config_file" {
-  description = "Path to ArgoCD configuration file"
-  value       = var.install_argocd ? module.gitops[0].argocd_config_file : null
+# Kubeconfig output
+output "kubeconfig" {
+  description = "Kubeconfig for accessing the EKS cluster"
+  value       = <<-EOT
+apiVersion: v1
+kind: Config
+clusters:
+- name: ${module.eks.cluster_name}
+  cluster:
+    server: ${module.eks.cluster_endpoint}
+    certificate-authority-data: ${module.eks.cluster_certificate_authority_data}
+contexts:
+- name: ${module.eks.cluster_name}
+  context:
+    cluster: ${module.eks.cluster_name}
+    user: ${module.eks.cluster_name}
+current-context: ${module.eks.cluster_name}
+users:
+- name: ${module.eks.cluster_name}
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      command: aws
+      args:
+        - "eks"
+        - "get-token"
+        - "--cluster-name"
+        - "${module.eks.cluster_name}"
+        - "--region"
+        - "${var.region}"
+EOT
+  sensitive   = true
 }

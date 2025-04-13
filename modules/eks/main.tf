@@ -267,7 +267,6 @@ resource "aws_iam_openid_connect_provider" "eks_oidc" {
   )
 }
 
-
 # Create managed node groups for EKS
 resource "aws_eks_node_group" "eks_node_groups" {
   for_each = var.managed_node_groups
@@ -276,8 +275,12 @@ resource "aws_eks_node_group" "eks_node_groups" {
   node_group_name = "${var.prefix}-${each.value.name}-${var.environment}"
   node_role_arn   = aws_iam_role.eks_node_role.arn
   
-  # Use specified subnets or all private subnets
-  subnet_ids = length(lookup(each.value, "subnet_ids", [])) > 0 ? each.value.subnet_ids : var.private_subnet_ids
+  # Use simple indexing to distribute nodes across availability zones
+  # Since the node group name contains suffixes a, b, c, match them with indices 0, 1, 2
+  subnet_ids = length(regexall("-a", each.value.name)) > 0 ? [var.private_subnet_ids[0]] : (
+               length(regexall("-b", each.value.name)) > 0 ? [var.private_subnet_ids[1]] : (
+               length(regexall("-c", each.value.name)) > 0 ? [var.private_subnet_ids[2]] : var.private_subnet_ids
+               ))
   
   instance_types = lookup(each.value, "instance_types", var.node_groups_defaults.instance_types)
   ami_type       = lookup(each.value, "ami_type", var.node_groups_defaults.ami_type)

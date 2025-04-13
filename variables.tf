@@ -109,15 +109,33 @@ variable "managed_node_groups" {
   description = "Configuration for managed node groups"
   type        = any
   default     = {
-    app_nodes = {
-      name           = "app-nodes"
+    app_nodes_a = {
+      name           = "app-nodes-a"
       instance_types = ["t3.medium"]
       min_size       = 1
       max_size       = 5
       desired_size   = 2
       disk_size      = 50
+      # Привязка к первой зоне доступности
+      subnet_ids     = [] # Будет заполнено автоматически
       labels = {
         role = "app"
+        az   = "a"
+      }
+      taints = []
+    }
+    app_nodes_b = {
+      name           = "app-nodes-b"
+      instance_types = ["t3.medium"]
+      min_size       = 1
+      max_size       = 5
+      desired_size   = 2
+      disk_size      = 50
+      # Привязка ко второй зоне доступности
+      subnet_ids     = [] # Будет заполнено автоматически
+      labels = {
+        role = "app"
+        az   = "b"
       }
       taints = []
     }
@@ -212,17 +230,4 @@ variable "vpn_enable_logs" {
   description = "Enable logging for VPN connections"
   type        = bool
   default     = true
-}
-
-# GitOps settings
-variable "install_argocd" {
-  description = "Install ArgoCD for GitOps"
-  type        = bool
-  default     = false
-}
-
-variable "helm_charts_repository_url" {
-  description = "URL of Git repository with Helm charts"
-  type        = string
-  default     = "https://github.com/your-org/helm-charts.git"
 }

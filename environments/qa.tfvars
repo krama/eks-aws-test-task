@@ -32,16 +32,33 @@ node_groups_defaults = {
 }
 
 managed_node_groups = {
-  app_nodes = {
-    name           = "app-nodes"
-    instance_types = ["t3.medium", "t3.large"]  # Multiple instance types for spot instances and cost savings
+  app_nodes_a = {
+    name           = "app-nodes-a"
+    instance_types = ["t3.medium"]
     capacity_type  = "SPOT"  # Use spot instances for cost savings in QA
-    min_size       = 2
+    min_size       = 1
     max_size       = 8
-    desired_size   = 3
+    desired_size   = 2
     disk_size      = 50
+    # Binding to the first availability zone through AZ in the name
     labels = {
       role = "app"
+      az   = "a"
+    }
+    taints = []
+  }
+  app_nodes_b = {
+    name           = "app-nodes-b"
+    instance_types = ["t3.medium", "t3.large"]  # Multiple instance types for spot instances and cost savings
+    capacity_type  = "SPOT"  # Use spot instances for cost savings in QA
+    min_size       = 1
+    max_size       = 8
+    desired_size   = 2
+    disk_size      = 50
+    # Binding to the second availability zone through AZ in the name
+    labels = {
+      role = "app"
+      az   = "b"
     }
     taints = []
   }
@@ -53,6 +70,7 @@ managed_node_groups = {
     max_size       = 4
     desired_size   = 2
     disk_size      = 30
+    # Distributed across all availability zones
     labels = {
       role = "system"
     }
@@ -70,6 +88,7 @@ managed_node_groups = {
     max_size       = 2
     desired_size   = 1
     disk_size      = 100  # More space for metrics and logs
+    # Distributed across all availability zones
     labels = {
       role = "monitoring"
     }
@@ -82,6 +101,24 @@ managed_node_groups = {
 }
 
 # Additional components installation
+aws_eks_addons = {
+  vpc-cni = {
+    addon_name        = "vpc-cni"
+    addon_version     = "v1.13.2-eksbuild.1"
+    resolve_conflicts = "OVERWRITE"
+  }
+  coredns = {
+    addon_name        = "coredns"
+    addon_version     = "v1.10.1-eksbuild.1"
+    resolve_conflicts = "OVERWRITE"
+  }
+  kube-proxy = {
+    addon_name        = "kube-proxy"
+    addon_version     = "v1.27.1-eksbuild.1"
+    resolve_conflicts = "OVERWRITE"
+  }
+}
+
 install_aws_load_balancer_controller = true
 install_metrics_server = true
 install_cluster_autoscaler = true

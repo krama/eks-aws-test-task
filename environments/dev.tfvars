@@ -36,16 +36,33 @@ install_aws_load_balancer_controller = true
 install_metrics_server = true
 install_cluster_autoscaler = true
 
+# Managed node groups configuration in different availability zones
 managed_node_groups = {
-  app_nodes = {
-    name           = "app-nodes"
+  app_nodes_a = {
+    name           = "app-nodes-a"
     instance_types = ["t3.small"]
     min_size       = 1
     max_size       = 3
     desired_size   = 1
     disk_size      = 20
+    # Will be bound to first availability zone through AZ in name
     labels = {
       role = "app"
+      az   = "a"
+    }
+    taints = []
+  }
+  app_nodes_b = {
+    name           = "app-nodes-b"
+    instance_types = ["t3.small"]
+    min_size       = 1
+    max_size       = 3
+    desired_size   = 1
+    disk_size      = 20
+    # Will be bound to second availability zone through AZ in name
+    labels = {
+      role = "app"
+      az   = "b"
     }
     taints = []
   }

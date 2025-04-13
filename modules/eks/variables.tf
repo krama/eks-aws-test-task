@@ -1,12 +1,10 @@
-# EKS cluster module variables
-
 variable "prefix" {
   description = "Prefix for all resources"
   type        = string
 }
 
 variable "environment" {
-  description = "Environment for deployment"
+  description = "Deployment environment"
   type        = string
 }
 
@@ -15,53 +13,58 @@ variable "region" {
   type        = string
 }
 
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
-  type        = string
-}
-
-variable "cluster_version" {
-  description = "Kubernetes version for the EKS cluster"
-  type        = string
-  default     = "1.27"
-}
-
 variable "vpc_id" {
-  description = "ID of the VPC for the EKS cluster"
+  description = "ID of VPC for EKS cluster"
   type        = string
 }
 
 variable "private_subnet_ids" {
-  description = "List of IDs of private subnets for EKS nodes"
+  description = "List of private subnet IDs for EKS nodes"
   type        = list(string)
 }
 
+variable "public_access_cidrs" {
+  description = "List of CIDR blocks which can access the Amazon EKS public API server endpoint"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "availability_zones" {
+  description = "List of availability zones used by subnets"
+  type        = list(string)
+}
+
+variable "cluster_name" {
+  description = "Name of EKS cluster"
+  type        = string
+}
+
+variable "cluster_version" {
+  description = "Kubernetes version for EKS cluster"
+  type        = string
+  default     = "1.31"
+}
+
 variable "endpoint_private_access" {
-  description = "Allow private access to the EKS cluster API server"
+  description = "Enable private API server endpoint for EKS"
   type        = bool
   default     = true
 }
 
 variable "endpoint_public_access" {
-  description = "Allow public access to the EKS cluster API server"
+  description = "Enable public API server endpoint for EKS"
   type        = bool
   default     = false
 }
 
-variable "public_access_cidrs" {
-  description = "CIDR blocks allowed for public access to the EKS cluster API server"
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
-}
-
 variable "cluster_log_types" {
-  description = "List of log types for the EKS cluster to send to CloudWatch"
+  description = "List of log types to send to CloudWatch"
   type        = list(string)
   default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 }
 
 variable "log_retention_days" {
-  description = "Number of days to retain EKS cluster logs in CloudWatch"
+  description = "Number of days to retain EKS logs in CloudWatch"
   type        = number
   default     = 30
 }
@@ -76,40 +79,37 @@ variable "node_groups_defaults" {
     min_size       = 1
     max_size       = 3
     desired_size   = 1
-    labels         = {}
   }
 }
 
 variable "managed_node_groups" {
-  description = "Map of configurations for EKS managed node groups"
+  description = "Map of managed node group configurations"
   type        = any
   default     = {}
 }
 
-variable "fargate_profiles" {
-  description = "Map of AWS Fargate profiles for running pods without EC2 instances"
+variable "cluster_security_group_additional_rules" {
+  description = "Additional security group rules for EKS cluster"
   type        = any
   default     = {}
 }
 
-variable "map_roles" {
-  description = "Additional IAM roles to add to the aws-auth ConfigMap"
-  type = list(object({
-    rolearn  = string
-    username = string
-    groups   = list(string)
-  }))
-  default = []
+variable "node_security_group_additional_rules" {
+  description = "Additional security group rules for EKS nodes"
+  type        = any
+  default     = {}
 }
 
-variable "map_users" {
-  description = "Additional IAM users to add to the aws-auth ConfigMap"
-  type = list(object({
-    userarn  = string
-    username = string
-    groups   = list(string)
-  }))
-  default = []
+variable "aws_auth_users" {
+  description = "List of IAM users to add to the aws-auth ConfigMap"
+  type        = list(any)
+  default     = []
+}
+
+variable "aws_auth_roles" {
+  description = "List of IAM roles to add to the aws-auth ConfigMap"
+  type        = list(any)
+  default     = []
 }
 
 variable "tags" {
@@ -121,5 +121,5 @@ variable "tags" {
 variable "use_localstack" {
   description = "Flag indicating if LocalStack is being used"
   type        = bool
-  default     = true
+  default     = false
 }

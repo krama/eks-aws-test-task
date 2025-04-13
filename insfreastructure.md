@@ -13,7 +13,6 @@ The infrastructure is divided into the following logical modules:
 5. **Add-ons Module** - configures IAM roles and policies for cluster components: Cluster Autoscaler, Metrics Server, etc.
 6. **Monitoring Module** - configures monitoring tools: CloudWatch Dashboard and Alarms
 7. **VPN Module** - provides secure access to the EKS cluster API through AWS Client VPN
-8. **ArgoCD Module** - installs and configures ArgoCD for managing Kubernetes resources through GitOps
 
 ## GitOps Model
 
@@ -21,13 +20,7 @@ The infrastructure uses a GitOps approach to manage cluster components:
 
 1. **Terraform** is responsible only for:
    - Creating basic AWS infrastructure (VPC, subnets, IAM, EKS, VPN)
-   - Installing ArgoCD through Helm
    - Creating IAM roles and policies for cluster components
-
-2. **ArgoCD** is responsible for:
-   - Installing all Helm charts (AWS Load Balancer Controller, Cluster Autoscaler, Metrics Server)
-   - Managing application configurations
-   - Synchronizing the cluster state with a Git repository
 
 ## Environments
 
@@ -52,7 +45,6 @@ Configurations are created for four different environments:
   - Access to the cluster API is restricted through VPN
   - All components run in one node group
   - Basic KMS configuration with a short recovery period (7 days)
-  - ArgoCD for implementing GitOps
 
 - **Network**:
   - VPC CIDR: 10.10.0.0/16
@@ -71,7 +63,6 @@ Configurations are created for four different environments:
   - Access to the cluster API is restricted through VPN
   - Workloads and system components are separated by node groups
   - Additional IAM policies for accessing AWS services
-  - ArgoCD for implementing GitOps
 
 - **Network**:
   - VPC CIDR: 10.20.0.0/16
@@ -93,7 +84,6 @@ Configurations are created for four different environments:
   - EBS CSI driver for persistent storage
   - Service accounts with IRSA for accessing AWS services
   - Separate security groups for different types of workloads
-  - ArgoCD for implementing GitOps
 
 - **Network**:
   - VPC CIDR: 10.30.0.0/16
@@ -116,7 +106,6 @@ Configurations are created for four different environments:
   - Separate node group for monitoring with a large amount of storage
   - Strict IAM policies, following the principle of least privilege
   - AWS Secrets Manager for storing sensitive data
-  - ArgoCD for implementing GitOps
 
 - **Network**:
   - VPC CIDR: 10.40.0.0/16
@@ -151,56 +140,3 @@ Configurations are created for four different environments:
 - **Distributed Nodes** - distributes nodes across multiple availability zones
 - **CloudWatch Alarms** - notifications for critical issues
 - **Node Group Separation** - separates system and user workloads
-
-### Working with ALB
-
-- **AWS Load Balancer Controller** - manages ALB from Kubernetes through ArgoCD
-- **Ingress Resources** - creates load balancers through the Kubernetes API
-- **Public/Private Load Balancers** - has flexible access control for services
-- **SSL/TLS Termination** - encrypts traffic using certificates
-- **Sticky Sessions** - supports session persistence for applications that require it
-- **Zone Balancing** - evenly distributes traffic across availability zones
-
-## GitOps and ArgoCD
-
-- **Separation of Concerns** - Terraform creates infrastructure, ArgoCD manages applications
-- **Declarative Configuration** - all configurations are stored in a Git repository
-- **Automatic Synchronization** - ArgoCD automatically synchronizes the cluster state with the repository
-- **Repeatability** - ensures identical environments
-- **Change Transparency** - all changes are tracked in the version control system
-- **Role Separation** - has separate responsibilities between DevOps and developers
-
-## Additional Recommendations for Implementation
-
-1. **Integrate CI/CD**:
-   - Use a GitOps approach with ArgoCD to synchronize resources with the repository
-   - Create a pipeline for checking and applying Terraform configurations
-   - Implement automatic updating of the Helm chart repository
-
-2. **Manage Secrets**:
-   - Use AWS Secrets Manager or HashiCorp Vault to manage sensitive data
-   - Integrate the external-secrets operator for synchronizing secrets in Kubernetes
-
-3. **Logging and Auditing**:
-   - Set up EFK (Elasticsearch, Fluentd, Kibana) or CloudWatch for centralized log collection
-   - Enable AWS CloudTrail for API call auditing
-
-4. **Backup and Restore**:
-   - Set up regular backups of Kubernetes resources with Velero
-   - Create a disaster recovery plan
-
-5. **Cluster Updates**:
-   - Follow a blue/green deployment process for updating the cluster with minimal downtime
-   - Regularly update the EKS cluster to use new features and security patches
-   - Use managed node groups for simplifying node updates
-
-6. **Cost Optimization**:
-   - Use Spot instances for non-critical workloads
-   - Set up automatic scaling for efficient resource use
-   - Use EC2 Savings Plans or Reserved Instances for stable workloads
-   - Regularly analyze resource usage and optimize node groups
-
-7. **Monitoring and Alerting**:
-   - Create complex dashboards for visualizing metrics
-   - Set up alerts for various metrics (CPU, memory, storage, latency)
-   - Use AWS X-Ray for distributed tracing

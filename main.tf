@@ -40,6 +40,7 @@ module "eks" {
   region                   = var.region
   vpc_id                   = module.network.vpc_id
   private_subnet_ids       = module.network.private_subnet_ids
+  availability_zones       = module.network.availability_zones
   cluster_name             = local.eks_cluster_name
   cluster_version          = var.eks_cluster_version
   endpoint_private_access  = var.endpoint_private_access 
@@ -50,7 +51,7 @@ module "eks" {
   node_groups_defaults     = var.node_groups_defaults
   managed_node_groups      = var.managed_node_groups
   
-  # Флаг использования LocalStack
+  # Flag for using LocalStack
   use_localstack           = var.use_localstack
   
   tags                     = local.resource_tags
@@ -94,7 +95,7 @@ module "addons" {
   install_metrics_server    = var.install_metrics_server
   install_cluster_autoscaler = var.install_cluster_autoscaler
   
-  # Флаг использования LocalStack
+  # Flag for using LocalStack
   use_localstack           = var.use_localstack
   
   tags                     = local.resource_tags
@@ -134,20 +135,4 @@ module "vpn" {
   tags                 = local.resource_tags
 
   depends_on = [module.network, module.eks]
-}
-
-# ArgoCD module
-module "gitops" {
-  count  = var.install_argocd && !var.use_localstack ? 1 : 0
-  source = "./modules/argocd"
-
-  prefix               = var.prefix
-  environment          = var.environment
-  eks_cluster_name     = module.eks.cluster_name
-  eks_oidc_provider_arn = module.eks.oidc_provider_arn
-  argocd_server_url    = module.eks.cluster_endpoint
-  helm_charts_repository_url = var.helm_charts_repository_url
-  tags                 = local.resource_tags
-
-  depends_on = [module.eks, module.security]
 }
